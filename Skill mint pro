@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SkillMint Lite — Learn & Earn (Demo)</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --accent:#f59e0b; --muted:#9aa4b2; --text:#e6eef6;
+  }
+  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+  body{margin:0; background:linear-gradient(180deg,#071021 0%, #0f1724 100%); color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .app{width:100%;max-width:920px;}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px; padding:18px; box-shadow:0 8px 24px rgba(2,6,23,0.6);}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  h1{margin:0;font-size:18px}
+  .small{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:10px;align-items:center}
+  button{background:var(--accent);color:#081023;border:0;padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer}
+  input[type="text"]{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--text);width:100%}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:12px}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+  .panel{padding:12px;border-radius:10px;background:rgba(255,255,255,0.02)}
+  .question{margin-bottom:10px}
+  .options{display:flex;flex-direction:column;gap:8px}
+  .opt{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+  .opt.selected{outline:2px solid rgba(245,158,11,0.4)}
+  .stat{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .leader{max-height:260px;overflow:auto}
+  .badge{background:rgba(245,158,11,0.12);padding:6px 8px;border-radius:8px;color:var(--accent);font-weight:700}
+  .muted{color:var(--muted)}
+  footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <header>
+        <div>
+          <h1>SkillMint Lite <span class="small">— Learn & Earn (Demo)</span></h1>
+          <div class="small muted">Daily quiz. Answer. Earn coins. Build traction.</div>
+        </div>
+        <div class="row">
+          <div id="coinDisplay" class="badge">Coins: 0</div>
+          <div id="userDisplay" class="muted">Not logged in</div>
+        </div>
+      </header>
+
+      <div id="loginArea" class="panel">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="nameInput" type="text" placeholder="Apna naam daalo (e.g., Jaheen)" />
+          <button id="loginBtn">Start</button>
+        </div>
+        <div class="small muted" style="margin-top:8px">Login simple hai — name se local profile banta hai. No password.</div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="grid">
+        <div>
+          <div id="quizArea" class="panel">
+            <div id="quizIntro">
+              <h3 style="margin:0">Daily Quiz</h3>
+              <div class="small muted">5 questions — finish to earn coins. Repeat once every 24h in demo.</div>
+              <div style="height:10px"></div>
+              <button id="startQuizBtn">Start Quiz</button>
+            </div>
+
+            <div id="quizPlay" style="display:none">
+              <div class="stat">
+                <div class="small muted">Q <span id="qIndex">1</span>/5</div>
+                <div class="badge" id="timer">Time: 30s</div>
+              </div>
+              <div class="question">
+                <div id="qText" style="font-weight:700">Question text</div>
+                <div class="options" id="options"></div>
+              </div>
+              <div style="display:flex;gap:8px;justify-content:space-between;align-items:center">
+                <div class="small muted">Score: <span id="currScore">0</span></div>
+                <div>
+                  <button id="nextBtn">Next</button>
+                  <button id="finishBtn" style="display:none">Finish</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="quizResult" style="display:none;margin-top:10px">
+              <h3 style="margin:0">Quiz Result</h3>
+              <div style="height:8px"></div>
+              <div class="small">You scored <strong id="finalScore">0</strong> — Coins earned: <strong id="earnedCoins">0</strong></div>
+              <div style="height:8px"></div>
+              <button id="closeResult">Close</button>
+            </div>
+
+          </div>
+
+          <div style="height:12px"></div>
+
+          <div class="panel">
+            <h3 style="margin:0">How coins work</h3>
+            <div class="small muted">Each correct answer = 10 coins. 5-question quiz => up to 50 coins. Redeem is demo only.</div>
+            <div style="height:8px"></div>
+            <button id="redeemBtn">Redeem (Demo)</button>
+          </div>
+        </div>
+
+        <aside>
+          <div class="panel">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div class="small muted">Profile</div>
+                <div id="profileName"><strong>Guest</strong></div>
+              </div>
+              <div id="streak" class="muted">Streak: 0</div>
+            </div>
+            <div style="height:8px"></div>
+            <div class="small muted">Leaderboard (local)</div>
+            <div style="height:8px"></div>
+            <div class="leader" id="leaderboard"></div>
+          </div>
+        </aside>
+      </div>
+
+      <footer>Demo app — for real payouts you need server, KYC and payment gateway (Razorpay/Cashfree).</footer>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ====== Simple question bank (customize easily) ======
+  const QUESTIONS = [
+    {q:"Bharat ki rajdhani kya hai?", opts:["Mumbai","Delhi","Kolkata","Chennai"], ans:1},
+    {q:"HTML ka full form kya hai?", opts:["HyperText Markup Language","HighText Machine Language","Hyperloop Text Markup","None"], ans:0},
+    {q:"2 + 3 * 4 = ?", opts:["20","14","10","24"], ans:1},
+    {q:"HTTP kis cheez ke liye use hota hai?", opts:["Web protocol","Database","Image format","Operating system"], ans:0},
+    {q:"India ka national animal?", opts:["Tiger","Lion","Elephant","Peacock"], ans:0}
+  ];
+
+  // ====== Elements ======
+  const nameInput = document.getElementById('nameInput');
+  const loginBtn = document.getElementById('loginBtn');
+  const userDisplay = document.getElementById('userDisplay');
+  const coinDisplay = document.getElementById('coinDisplay');
+  const startQuizBtn = document.getElementById('startQuizBtn');
+  const quizIntro = document.getElementById('quizIntro');
+  const quizPlay = document.getElementById('quizPlay');
+  const qIndex = document.getElementById('qIndex');
+  const qText = document.getElementById('qText');
+  const optionsDiv = document.getElementById('options');
+  const nextBtn = document.getElementById('nextBtn');
+  const finishBtn = document.getElementById('finishBtn');
+  const timerEl = document.getElementById('timer');
+  const currScoreEl = document.getElementById('currScore');
+  const quizResult = document.getElementById('quizResult');
+  const finalScore = document.getElementById('finalScore');
+  const earnedCoins = document.getElementById('earnedCoins');
+  const closeResult = document.getElementById('closeResult');
+  const profileName = document.getElementById('profileName');
+  const streakEl = document.getElementById('streak');
+  const leaderboardDiv = document.getElementById('leaderboard');
+  const redeemBtn = document.getElementById('redeemBtn');
+
+  // ====== Local storage helpers ======
+  function getProfiles(){ return JSON.parse(localStorage.getItem('sm_profiles')||'{}'); }
+  function saveProfiles(p){ localStorage.setItem('sm_profiles', JSON.stringify(p)); }
+  function getActive(){ return localStorage.getItem('sm_active') || null; }
+  function setActive(name){ localStorage.setItem('sm_active', name); }
+
+  // ====== Default state ======
+  let state = {
+    user: getActive(),
+    coins:0,
+    score:0,
+    index:0,
+    timer:30,
+    selected: null,
+    timerId: null
+  };
+
+  // ====== Login flow ======
+  function login(name){
+    if(!name) return alert('Name daalo bhai.');
+    const profiles = getProfiles();
+    if(!profiles[name]) profiles[name] = {coins:0, best:0, streak:0, lastQuiz: null};
+    saveProfiles(profiles);
+    setActive(name);
+    state.user = name;
+    state.coins = profiles[name].coins;
+    refreshUI();
+  }
+
+  loginBtn.addEventListener('click', ()=> login(nameInput.value.trim()));
+
+  // ====== UI refresh ======
+  function refreshUI(){
+    const p = state.user || 'Guest';
+    userDisplay.textContent = state.user ? `Hi, ${state.user}` : 'Not logged in';
+    profileName.innerHTML = `<strong>${p}</strong>`;
+    coinDisplay.textContent = `Coins: ${state.coins}`;
+    // streak
+    const profiles = getProfiles();
+    if(state.user && profiles[state.user]) streakEl.textContent = `Streak: ${profiles[state.user].streak || 0}`;
+    renderLeaderboard();
+  }
+
+  // ====== Leaderboard (local) ======
+  function renderLeaderboard(){
+    const profiles = getProfiles();
+    const arr = Object.keys(profiles).map(k=>({name:k, coins:profiles[k].coins, best:profiles[k].best}));
+    arr.sort((a,b)=>b.coins - a.coins);
+    if(arr.length===0){ leaderboardDiv.innerHTML = '<div class="muted">No players yet</div>'; return; }
+    leaderboardDiv.innerHTML = arr.slice(0,20).map((p,idx)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.02)"><div>${idx+1}. ${p.name}</div><div class="muted">${p.coins}c</div></div>`).join('');
+  }
+
+  // ====== Quiz flow ======
+  startQuizBtn.addEventListener('click', ()=>{
+    if(!state.user) return alert('Pehle apna naam daalo (Start).');
+    // prevent multiple plays in 24h in demo
+    const profiles = getProfiles();
+    const last = profiles[state.user].lastQuiz ? new Date(profiles[state.user].lastQuiz) : null;
+    if(last){
+      const diff = (Date.now() - last.getTime()) / (1000*60*60);
+      if(diff < 24) {
+        if(!confirm('Demo: You already played in last 24h. Play again anyway?')) return;
+      }
+    }
+    state.index = 0; state.score = 0; state.timer = 30;
+    quizIntro.style.display='none'; quizResult.style.display='none'; quizPlay.style.display='';
+    loadQuestion();
+  });
+
+  function loadQuestion(){
+    const q = QUESTIONS[state.index];
+    qIndex.textContent = state.index+1;
+    qText.textContent = q.q;
+    optionsDiv.innerHTML = '';
+    state.selected = null;
+    q.opts.forEach((o,i)=>{
+      const d = document.createElement('div');
+      d.className = 'opt';
+      d.textContent = o;
+      d.addEventListener('click', ()=> {
+        document.querySelectorAll('.opt').forEach(x=>x.classList.remove('selected'));
+        d.classList.add('selected');
+        state.selected = i;
+      });
+      optionsDiv.appendChild(d);
+    });
+    currScoreEl.textContent = state.score;
+    nextBtn.style.display = 'inline-block';
+    finishBtn.style.display = (state.index === QUESTIONS.length-1) ? 'inline-block' : 'none';
+    startTimer();
+  }
+
+  function startTimer(){
+    clearInterval(state.timerId);
+    state.timer = 30;
+    timerEl.textContent = 'Time: 30s';
+    state.timerId = setInterval(()=>{
+      state.timer--;
+      timerEl.textContent = 'Time: ' + state.timer + 's';
+      if(state.timer<=0){ clearInterval(state.timerId); handleAnswer(null); }
+    }, 1000);
+  }
+
+  function handleAnswer(selected){
+    clearInterval(state.timerId);
+    const q = QUESTIONS[state.index];
+    const correct = q.ans;
+    const isCorrect = (selected !== null && selected === correct);
+    if(isCorrect) state.score += 10;
+    currScoreEl.textContent = state.score;
+    // highlight correct/wrong
+    document.querySelectorAll('.opt').forEach((el, i)=>{
+      el.style.opacity = '0.6';
+      if(i===correct) el.style.border = '2px solid rgba(34,197,94,0.6)'; // correct
+      if(selected!==null && i===selected && selected!==correct) el.style.border = '2px solid rgba(239,68,68,0.6)';
+    });
+    // disable clicks
+    document.querySelectorAll('.opt').forEach(el=>el.onclick=null);
+  }
+
+  nextBtn.addEventListener('click', ()=>{
+    // process current selection
+    const sel = state.selected;
+    handleAnswer(sel);
+    // move to next after short delay
+    setTimeout(()=>{
+      state.index++;
+      if(state.index < QUESTIONS.length) loadQuestion();
+      else showResult();
+    }, 900);
+  });
+
+  finishBtn.addEventListener('click', ()=>{
+    const sel = state.selected;
+    handleAnswer(sel);
+    setTimeout(()=> showResult(), 800);
+  });
+
+  function showResult(){
+    quizPlay.style.display='none';
+    quizResult.style.display='';
+    finalScore.textContent = state.score;
+    const coinsEarned = state.score; // 10 coins per correct answer: score == coins
+    earnedCoins.textContent = coinsEarned;
+    // update profile
+    const profiles = getProfiles();
+    if(state.user){
+      const p = profiles[state.user];
+      p.coins = (p.coins || 0) + coinsEarned;
+      p.best = Math.max(p.best || 0, state.score);
+      // streak: if last played yesterday or earlier increment, else reset if gap >48h
+      const last = p.lastQuiz ? new Date(p.lastQuiz) : null;
+      const now = new Date();
+      if(last){
+        const diffh = (now - last) / (1000*60*60);
+        if(diffh < 48 && diffh > 0) p.streak = (p.streak||0) + 1;
+        else p.streak = 1;
+      } else p.streak = 1;
+      p.lastQuiz = now.toISOString();
+      profiles[state.user] = p;
+      saveProfiles(profiles);
+      state.coins = p.coins;
+    }
+    refreshUI();
+  }
+
+  closeResult.addEventListener('click', ()=> {
+    quizResult.style.display='none';
+    quizIntro.style.display='';
+  });
+
+  // handle option timeout (when timer hits 0) - auto moved in handleAnswer
+
+  // ====== Demo redeem flow ======
+  redeemBtn.addEventListener('click', ()=>{
+    if(!state.user) return alert('Pehle login karo.');
+    if(state.coins < 100) return alert('Demo: Minimum 100 coins required to redeem. Earn more!');
+    // In real app -> call backend + payment gateway -> actual payout. Here we just simulate.
+    if(confirm('Demo Redeem: Convert 100 coins to ₹10? Proceed?')){
+      const profiles = getProfiles();
+      profiles[state.user].coins -= 100;
+      saveProfiles(profiles);
+      state.coins = profiles[state.user].coins;
+      alert('Redeem request recorded (demo). For real payouts, integrate Razorpay/Cashfree + KYC + backend.');
+      refreshUI();
+    }
+  });
+
+  // Initial render
+  (function init(){
+    if(getActive()){
+      state.user = getActive();
+      const p = getProfiles()[state.user] || {coins:0,streak:0};
+      state.coins = p.coins || 0;
+    }
+    refreshUI();
+  })();
+
+  // ====== NOTE: To customize questions, change QUESTIONS array above. To add real login or payments, backend required. ======
+})();
+</script>
+</body>
+</html>
